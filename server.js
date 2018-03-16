@@ -1,34 +1,42 @@
-/******************************************************************************
-* Course: Oregon State University CS 340-400 Spring 2017
-* Program: Final Project, Canyoneering Beta Db
-* Author: Drew Wolfe
-* Description: 
-*
-* FILE: server.js
-*  
-* 
-*  
-* 
-******************************************************************************/
+// *****************************************************************************
+// * Course: Oregon State University CS 340-400 Spring 2017
+// * Program: Final Project, Canyoneering Beta Db
+// * Author: Drew Wolfe
+// * FILE: server.js
+// *****************************************************************************
 var express = require('express');
+var path = require('path');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 var pool = mysql.createPool({
-	host: 'localhost',
-	user: process.env.DBUSER,
-	password: process.env.DBPASS,
-	database: process.env.DBNAME
+  connectionLimit : 10,
+  host            : 'classmysql.engr.oregonstate.edu',
+  user            : 'cs340_wolfedr',
+  password        : '0131',
+  database        : 'cs340_wolfedr'
 });
+
+// var mysql = require('./dbcon.js');
+// var pool = mysql.createPool({
+// 	host: 'oniddb.cws.oregonstate.edu',
+// 	user: 'wolfedr-db',
+// 	password: '*********',
+// 	database: 'wolfedr-db'
+// });
 
 var app = express();
 var handlebars = require('express-handlebars').create({defaultLayout: 'main'});
 
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
-app.set('port', 3000);
+app.set('port', 50362);
+
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-app.use(express.static('public'));
+
+// app.use('/static', express.static(path.join(__dirname, 'public')))
+// app.use(express.static('public'));
 
 app.get('/', function(req, res) {
 	res.render('home');
@@ -46,45 +54,49 @@ var selectTableData = function(res, table) {
   });
 };
 
-app.get('/actors', function(req, res) {
-  selectTableData(res, 'actor');
+app.get('/trips', function(req, res) {
+  selectTableData(res, 'trip');
 });
 
-app.get('/episodes', function(req, res) {
-  selectTableData(res, 'episode');
+app.get('/rappels', function(req, res) {
+  selectTableData(res, 'rappel');
 });
 
-app.get('/studios', function(req, res) {
-  selectTableData(res, 'studio');
+app.get('/canyons', function(req, res) {
+  selectTableData(res, 'canyon');
 });
 
-app.get('/series', function(req, res) {
-  selectTableData(res, 'series');
+app.get('/routes', function(req, res) {
+  selectTableData(res, 'route');
 });
 
-app.get('/characters', function(req, res) {
-  selectTableData(res, 'st_character');
+app.get('/adventurers', function(req, res) {
+  selectTableData(res, 'adventurer');
 });
 
-app.get('/actor_character', function(req, res) {
-  selectTableData(res, 'actor_character');
+app.get('/advent_trip', function(req, res) {
+  selectTableData(res, 'advent_trip');
 });
 
-app.get('/actor_series', function(req, res) {
-  selectTableData(res, 'actor_series');
+app.get('/trip_route', function(req, res) {
+  selectTableData(res, 'trip_route');
 });
 
-app.get('/character_episode', function(req, res) {
-  selectTableData(res, 'character_episode');
+app.get('/advent_rappel', function(req, res) {
+  selectTableData(res, 'advent_rappel');
 });
 
-app.post('/search_character_episode', function(req, res) {
+app.get('/route_canyon', function(req, res) {
+  selectTableData(res, 'route_canyon');
+});
+
+app.post('/search_route_canyon', function(req, res) {
   var ctx = {};
   var body = req.body;
-  var queryStr = "SELECT st_character.fname, st_character.lname FROM st_character ";
-  queryStr += 'INNER JOIN character_episode ON st_character.id = character_episode.character_id ';
-  queryStr += 'INNER JOIN episode ON episode.id = character_episode.episode_id';
-  queryStr += ' WHERE episode.title = "' + body.title + '";';
+  var queryStr = "SELECT route.title, route.aca_rating FROM route ";
+  queryStr += 'INNER JOIN route_canyon ON route.id = route_canyon.route_id ';
+  queryStr += 'INNER JOIN canyon ON canyon.id = route_canyon.canyon_id';
+  queryStr += 'WHERE canyon.name = "' + body.name + '";';
 
   pool.query(queryStr, function(err, rows, fields) {
     if (err) {
@@ -95,6 +107,24 @@ app.post('/search_character_episode', function(req, res) {
     res.send(ctx);
   });
 });
+
+// app.post('/search_advent_rappel', function(req, res) {
+//   var ctx = {};
+//   var body = req.body;
+//   var queryStr = "SELECT adventurer.fname, adventurer.lname FROM adventurer ";
+//   queryStr += 'INNER JOIN advent_rappel ON adventurer.id = advent_rappel.adventurer_id ';
+//   queryStr += 'INNER JOIN rappel ON rappel.id = advent_rappel.rappel_id';
+//   queryStr += ' WHERE rappel.title = "' + body.title + '";';
+
+//   pool.query(queryStr, function(err, rows, fields) {
+//     if (err) {
+//       console.log(err);
+//       return;
+//     }
+//     ctx.results = rows;
+//     res.send(ctx);
+//   });
+// });
 
 var generateUpdateStr = function(body, table) {
   var keys = [];
@@ -123,36 +153,40 @@ var updateEntry = function(req, res, table) {
   });
 };
 
-app.post('/actors', function(req, res) {
-  updateEntry(req, res, 'actor');
+app.post('/trips', function(req, res) {
+  updateEntry(req, res, 'trip');
 });
 
-app.post('/characters', function(req, res) {
-  updateEntry(req, res, 'st_character');
+app.post('/adventurers', function(req, res) {
+  updateEntry(req, res, 'adventurer');
 });
 
-app.post('/episodes', function(req, res) {
-  updateEntry(req, res, 'episode');
+app.post('/rappels', function(req, res) {
+  updateEntry(req, res, 'rappel');
 });
 
-app.post('/series', function(req, res) {
-  updateEntry(req, res, 'series');
+app.post('/routes', function(req, res) {
+  updateEntry(req, res, 'route');
 });
 
-app.post('/studios', function(req, res) {
-  updateEntry(req, res, 'studio');
+app.post('/canyons', function(req, res) {
+  updateEntry(req, res, 'canyon');
 });
 
-app.post('/actor_character', function(req, res) {
-  updateEntry(req, res, 'actor_character');
+app.post('/advent_trip', function(req, res) {
+  updateEntry(req, res, 'advent_trip');
 });
 
-app.post('/actor_series', function(req, res) {
-  updateEntry(req, res, 'actor_series');
+app.post('/trip_route', function(req, res) {
+  updateEntry(req, res, 'trip_route');
 });
 
-app.post('/character_episode', function(req, res) {
-  updateEntry(req, res, 'character_episode');
+app.post('/advent_rappel', function(req, res) {
+  updateEntry(req, res, 'advent_rappel');
+});
+
+app.post('/route_canyon', function(req, res) {
+  updateEntry(req, res, 'route_canyon');
 });
 
 var deleteEntry = function(req, res, table) {
@@ -168,34 +202,34 @@ var deleteEntry = function(req, res, table) {
   });
 };
 
-app.delete('/actors', function(req, res) {
-  deleteEntry(req, res, 'actor');
+app.delete('/trips', function(req, res) {
+  deleteEntry(req, res, 'trip');
 });
 
-app.delete('/characters', function(req, res) {
-  deleteEntry(req, res, 'st_character');
+app.delete('/adventurers', function(req, res) {
+  deleteEntry(req, res, 'adventurer');
 });
 
-app.delete('/studios', function(req, res) {
-  deleteEntry(req, res, 'studio');
+app.delete('/canyons', function(req, res) {
+  deleteEntry(req, res, 'canyon');
 });
 
-app.delete('/episodes', function(req, res) {
-  deleteEntry(req, res, 'episode');
+app.delete('/rappels', function(req, res) {
+  deleteEntry(req, res, 'rappel');
 });
 
-app.delete('/series', function(req, res) {
-  deleteEntry(req, res, 'series');
+app.delete('/routes', function(req, res) {
+  deleteEntry(req, res, 'route');
 });
 
-app.delete('/actor_series', function(req, res) {
+app.delete('/trip_route', function(req, res) {
   var ctx = {};
   var body = req.body;
-  var actor_id = body.actor_id;
-  var series_id = body.series_id;
+  var trip_id = body.trip_id;
+  var route_id = body.route_id;
 
-  var queryStr = 'DELETE FROM actor_series WHERE actor_id = ' + actor_id;
-  queryStr += ' AND series_id = ' + series_id + ';';
+  var queryStr = 'DELETE FROM trip_route WHERE trip_id = ' + trip_id;
+  queryStr += ' AND route_id = ' + route_id + ';';
 
   pool.query(queryStr, function(err, rows, fields) {
     if (err) {
@@ -207,14 +241,14 @@ app.delete('/actor_series', function(req, res) {
   });
 });
 
-app.delete('/actor_character', function(req, res) {
+app.delete('/advent_trip', function(req, res) {
   var ctx = {};
   var body = req.body;
-  var actor_id = body.actor_id;
-  var character_id = body.character_id;
+  var trip_id = body.trip_id;
+  var adventurer_id = body.adventurer_id;
 
-  var queryStr = 'DELETE FROM actor_character WHERE actor_id = ' + actor_id;
-  queryStr += ' AND character_id = ' + character_id + ';';
+  var queryStr = 'DELETE FROM advent_trip WHERE trip_id = ' + trip_id;
+  queryStr += ' AND adventurer_id = ' + adventurer_id + ';';
 
   pool.query(queryStr, function(err, rows, fields) {
     if (err) {
@@ -226,14 +260,33 @@ app.delete('/actor_character', function(req, res) {
   });
 });
 
-app.delete('/character_episode', function(req, res) {
+app.delete('/advent_rappel', function(req, res) {
   var ctx = {};
   var body = req.body;
-  var character_id = body.character_id;
-  var episode_id = body.episode_id;
+  var adventurer_id = body.adventurer_id;
+  var rappel_id = body.rappel_id;
 
-  var queryStr = 'DELETE FROM character_episode WHERE character_id = ' + character_id;
-  queryStr += ' AND episode_id = ' + episode_id + ';';
+  var queryStr = 'DELETE FROM advent_rappel WHERE adventurer_id = ' + adventurer_id;
+  queryStr += ' AND rappel_id = ' + rappel_id + ';';
+
+  pool.query(queryStr, function(err, rows, fields) {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    ctx.results = JSON.stringify(rows);
+    res.send(ctx);
+  });
+});
+
+app.delete('/route_canyon', function(req, res) {
+  var ctx = {};
+  var body = req.body;
+  var route_id = body.route_id;
+  var canyon_id = body.canyon_id;
+
+  var queryStr = 'DELETE FROM route_canyon WHERE route_id = ' + route_id;
+  queryStr += ' AND canyon_id = ' + canyon_id + ';';
 
   pool.query(queryStr, function(err, rows, fields) {
     if (err) {
@@ -259,4 +312,3 @@ app.use(function(err, req, res, next){
 app.listen(app.get('port'), function() {
 	console.log('Application started on port ' + app.get('port'));
 });
-

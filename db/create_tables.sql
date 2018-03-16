@@ -2,151 +2,166 @@
 * Course: Oregon State University CS 340-400 Spring 2017
 * Program: Final Project, Canyoneering Beta Db
 * Author: Drew Wolfe
-* Description: 
-*
 * FILE: create_tables.sql
-*  
-* 
-*  
-* 
 ******************************************************************************/
 
 /*
- * Drop statements to clean the out the old star_trek database records
+ * Drop statements to clean the out the old canyoneering database records
  * if they exist.
 */
 
-DROP TABLE IF EXISTS `actor_character`;
-DROP TABLE IF EXISTS `character_episode`;
-DROP TABLE IF EXISTS `actor_series`;
-DROP TABLE IF EXISTS `episode`;
-DROP TABLE IF EXISTS `actor`;
-DROP TABLE IF EXISTS `st_character`;
-DROP TABLE IF EXISTS `series`;
-DROP TABLE IF EXISTS `studio`;
+DROP TABLE IF EXISTS `advent_trip`;
+DROP TABLE IF EXISTS `advent_rappel`;
+DROP TABLE IF EXISTS `trip_route`;
+DROP TABLE IF EXISTS `route_canyon`;
+DROP TABLE IF EXISTS `rappel`;
+DROP TABLE IF EXISTS `trip`;
+DROP TABLE IF EXISTS `adventurer`;
+DROP TABLE IF EXISTS `route`;
+DROP TABLE IF EXISTS `canyon`;
+
 
 /*
- * star_trek.actor
- * Actors that have appeared in one or many Star Trek TV shows
+ * canyoneering.trip
+ * Trips include one or many Canyoneering adventurers
 */
 
-CREATE TABLE `actor` (
+CREATE TABLE `trip` (
+   `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
+   `adventName` VARCHAR(255) NOT NULL,
+   `adventDate` DATE,
+   `aca_rating` VARCHAR(255),
+   `weather` VARCHAR(255)	
+);
+
+/*
+ * canyoneering.adventurer
+ * Adventureres have one or many Canyoneering trips and rappels
+*/
+
+CREATE TABLE `adventurer` (
    `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
    `fname` VARCHAR(255) NOT NULL,
    `lname` VARCHAR(255),
-   `website` VARCHAR(255),
-   `twitter` VARCHAR(255)	
-) ENGINE=’innoDB’;
+   `username` VARCHAR(255) NOT NULL
+);
 
 /*
- * star_trek.st_character
- * Character roles that have appeared in one or many Star Trek TV shows
+ * canyoneering.canyon
+ * Canyons that have one or many Canyoneering routes
 */
 
-CREATE TABLE `st_character` (
-   `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
-   `fname` VARCHAR(255) NOT NULL,
-   `lname` VARCHAR(255),
-   `race` VARCHAR(255) NOT NULL
-) ENGINE=’innoDB’;
-
-/*
- * star_trek.studio
- * Studios that have produced one or many Star Trek TV shows
-*/
-
-CREATE TABLE `studio` (
+CREATE TABLE `canyon` (
    `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
    `name` VARCHAR(255) NOT NULL,
-   `address` VARCHAR(255),
-   `website` VARCHAR(255)
-) ENGINE=’innoDB’;
+   `state` VARCHAR(255),
+   `region` VARCHAR(255)
+);
 
 /*
- * star_trek.series
- * Star Trek TV series
+ * canyoneering.route
+ * Canyoneering route
 */
 
-CREATE TABLE `series` (
+CREATE TABLE `route` (
    `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
    `title` VARCHAR(255) NOT NULL,
-   `creator_fname` VARCHAR(255),
-   `creator_lname` VARCHAR(255) NOT NULL,
-   `start_date` DATE,
-   `end_date` DATE,
-   `studio_id` INT(11),
-   FOREIGN KEY(`studio_id`) REFERENCES studio(`id`)
+   `start_point` VARCHAR(255),
+   `end_point` VARCHAR(255),
+   `aca_rating` VARCHAR(255),
+   `num_rappel` INT(11),
+   `canyon_id` INT(11),
+   FOREIGN KEY(`canyon_id`) REFERENCES canyon(`id`)
       ON DELETE CASCADE
       ON UPDATE CASCADE
-) ENGINE=’innoDB’;
+);
 
 /*
- * star_trek.episode
- * Star Trek TV episodes
+ * canyoneering.rappel
+ * Canyoneering rappels
 */
 
-CREATE TABLE `episode` (
+CREATE TABLE `rappel` (
    `id` INT(11) PRIMARY KEY AUTO_INCREMENT,
    `title` VARCHAR(255) NOT NULL,
-   `episode_number` INT(11) NOT NULL,
-   `season_number` INT(11) NOT NULL,
-   `air_date` DATE,
-   `series_id` INT(11),
-   FOREIGN KEY(`series_id`) REFERENCES series(`id`)
+   `rappel_length_ft` INT(11) NOT NULL,
+   `difficulty_note` VARCHAR(255),
+   `anchr_type` VARCHAR(255),
+   `route_id` INT(11),
+   FOREIGN KEY(`route_id`) REFERENCES route(`id`)
       ON DELETE CASCADE
       ON UPDATE CASCADE
-) ENGINE=’innoDB’;
+);
 
 /*
- * star_trek.actor_series
- * This table relates actors to the Star Trek series they have
- * acted in. Many to many relationship (actor, series)
+ * canyoneering.trip_route
+ * This table relates trips to routes they take.
+ * A trip can take multiple routes. A route can be in many trips. 
+ * Many to many relationship (trip, route)
 */
 
-CREATE TABLE `actor_series` (
-   `actor_id` INT(11),
-   `series_id` INT(11),
-   PRIMARY KEY (`actor_id`, `series_id`),
-   FOREIGN KEY (`actor_id`) REFERENCES actor(`id`)
+CREATE TABLE `trip_route` (
+   `trip_id` INT(11),
+   `route_id` INT(11),
+   PRIMARY KEY (`trip_id`, `route_id`),
+   FOREIGN KEY (`trip_id`) REFERENCES trip(`id`)
       ON DELETE CASCADE
       ON UPDATE CASCADE,
-   FOREIGN KEY (`series_id`) REFERENCES series(`id`)
+   FOREIGN KEY (`route_id`) REFERENCES route(`id`)
       ON DELETE CASCADE
       ON UPDATE CASCADE
-) ENGINE=’innoDB’;
+);
 
 /*
- * star_trek.actor_character
- * This table relates actors to the characters they have played
- * in Star Trek TV shows. Many to many relationship (actor, character)
+ * canyoneering.advent_trip
+ * This table relates adventureres to the trips they have attended. 
+ * Many to many relationship (trip, adventurer)
 */
 
-CREATE TABLE `actor_character` (
-   `actor_id` INT(11),
-   `character_id` INT(11),
-   PRIMARY KEY (`actor_id`, `character_id`),
-   FOREIGN KEY (`actor_id`) REFERENCES actor(`id`)
+CREATE TABLE `advent_trip` (
+   `trip_id` INT(11),
+   `adventurer_id` INT(11),
+   PRIMARY KEY (`trip_id`, `adventurer_id`),
+   FOREIGN KEY (`trip_id`) REFERENCES trip(`id`)
       ON DELETE CASCADE
       ON UPDATE CASCADE,
-   FOREIGN KEY (`character_id`) REFERENCES st_character(`id`)
+   FOREIGN KEY (`adventurer_id`) REFERENCES adventurer(`id`)
       ON DELETE CASCADE
       ON UPDATE CASCADE
-) ENGINE=’innoDB’;
+);
 
 /*
- * star_trek.character_episode
- * This table relates Star Trek characters to which episodes they
- * appeared in. Many to many relationship (character, episode)
+ * canyoneering.advent_rappel
+ * This table relates Canyoneering adventurers to the rappels they
+ * have descended. Many to many relationship (adventurer, rappel)
 */
 
-CREATE TABLE `character_episode` (
-   `character_id` INT(11),
-   `episode_id` INT(11),
-   PRIMARY KEY (`character_id`, `episode_id`),
-   FOREIGN KEY (`character_id`) REFERENCES st_character(`id`)
+CREATE TABLE `advent_rappel` (
+   `adventurer_id` INT(11),
+   `rappel_id` INT(11),
+   PRIMARY KEY (`adventurer_id`, `rappel_id`),
+   FOREIGN KEY (`adventurer_id`) REFERENCES adventurer(`id`)
       ON DELETE CASCADE
       ON UPDATE CASCADE,
-   FOREIGN KEY (`episode_id`) REFERENCES episode(`id`)
+   FOREIGN KEY (`rappel_id`) REFERENCES rappel(`id`)
       ON DELETE CASCADE
       ON UPDATE CASCADE
-) ENGINE=’innoDB’;
+);
+
+/*
+ * canyoneering.route_canyon
+ * This table relates routes to the canyons they're in.
+ * Many routes to one canyon (route, canyon)
+*/
+
+CREATE TABLE `route_canyon` (
+   `route_id` INT(11),
+   `canyon_id` INT(11),
+   PRIMARY KEY (`route_id`, `canyon_id`),
+   FOREIGN KEY (`route_id`) REFERENCES route(`id`)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
+   FOREIGN KEY (`canyon_id`) REFERENCES canyon(`id`)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+);

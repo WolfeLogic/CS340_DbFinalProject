@@ -1,15 +1,9 @@
-/******************************************************************************
-* Course: Oregon State University CS 340-400 Spring 2017
-* Program: Final Project, Canyoneering Beta Db
-* Author: Drew Wolfe
-* Description: 
-*
-* FILE: app.js
-*  
-* 
-*  
-* 
-******************************************************************************/
+// *****************************************************************************
+// * Course: Oregon State University CS 340-400 Spring 2017
+// * Program: Final Project, Canyoneering Beta Db
+// * Author: Drew Wolfe
+// * FILE: app.js
+// *****************************************************************************
 
 var jsonToTable = function(json, tableName) {
   var table = "<table class='table-bordered'>";
@@ -40,7 +34,7 @@ var composeForm = function(selector, keys) {
   var form = "<form class='form-horizontal'>";
   for (var i = 0; i < keys.length; i++) {
     if (keys[i] === 'id') continue;
-    form += "<div class='form-group'><label class='col-sm-2 control-label'>" + keys[i] + "</label>";
+    form += "<div class='form-group'><label class='control-label col-sm-2'>" + keys[i] + "</label>";
     form += "<div class='col-sm-6'>";
     form += "<input type='text' class='form-control' id='" + keys[i] + "'>";
     form += "</div></div>";
@@ -58,6 +52,7 @@ var getKeys = function(data) {
   for (var key in data) {
     keys.push(key);
   }
+  console.log('This is a key: ' + key);
   return keys;
 };
 
@@ -151,29 +146,29 @@ var renderTable = function(url, selector) {
 };
 
 var makeSelect = function(data) {
-  var str = '';
+  var str = 'canyons';
   for (var key in data) {
     str += "<option value='" + data[key] + "'>" + data[key] + "</option>"; 
   }
   return str;
 };
 
-var searchChar = function(e) {
+var searchCnyn = function(e) {
   e.preventDefault();
 
-  var ep_title = $('#title').val();
-  var obj = { 'title': ep_title };
+  var cnyn_name = $('#name').val();
+  var obj = { 'name': cnyn_name };
   console.log(obj);
   $.ajax({
     dataType: 'json',
     type: 'POST',
-    url: '/search_character_episode',
+    url: '/search_route_canyon',
     data: obj,
     success: function(data) {
       var results = data.results;
       $('.search_results').html('');
       for (var i = 0; i < results.length; i++) {
-        var str = '<li>' + results[i].fname + ' ' + results[i].lname + '</li>';
+        var str = '<li>' + results[i].title + ' ' + results[i].aca_rating + '</li>';
         $('.search_results').append(str);
       }
     }
@@ -181,15 +176,16 @@ var searchChar = function(e) {
 };
 
 var render = function() {
-   renderTable('/actors', '#actors');
-   renderTable('/characters', '#characters');
-   renderTable('/episodes', '#episodes');
-   renderTable('/series', '#series');
-   renderTable('/studios', '#studios');
-   renderTable('/actor_character', '#actor_character');
-   renderTable('/actor_series', '#actor_series');
-   renderTable('/character_episode', '#character_episode');
-   $('.search').on('click', searchChar);
+   renderTable('/canyons', '#canyons');
+   renderTable('/routes', '#routes');
+   renderTable('/rappels', '#rappels');
+   renderTable('/trips', '#trips');
+   renderTable('/adventurers', '#adventurers');
+   renderTable('/advent_trip', '#advent_trip');
+   renderTable('/trip_route', '#trip_route');
+   renderTable('/advent_rappel', '#advent_rappel');
+   renderTable('/route_canyon', '#route_canyon');
+   $('.search').on('click', searchCnyn);
 };
 
 $(document).ready(function() {

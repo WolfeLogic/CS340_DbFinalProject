@@ -1,28 +1,21 @@
 {
-  "name": "final_project",
-  "version": "0.0.1",
-  "description": "Final project for CS340-400",
+  "name": "cs340_final_project",
+  "version": "1.0.0",
+  "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
-  "keywords": [
-    "databases",
-    "final",
-    "project",
-    "mysql",
-    "node"
-  ],
   "author": "Drew Wolfe",
-  "license": "MIT",
-  "bugs": {
-    "url": "http://web.engr.oregonstate.edu/~wolfedr/CS340/phptest.php"
-  },
-  "homepage": "http://web.engr.oregonstate.edu/~wolfedr/CS340/phptest.php",
+  "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.15.2",
-    "express": "^4.14.0",
+    "ajax": "0.0.4",
+    "body-parser": "^1.17.2",
+    "bootstrap": "^3.3.7",
+    "express": "^4.15.3",
     "express-handlebars": "^3.0.0",
-    "mysql": "^2.11.1"
+    "jquery": "^3.2.1",
+    "mysql": "^2.13.0"
   }
 }
